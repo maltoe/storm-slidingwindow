@@ -4,6 +4,7 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.topology.BoltDeclarer;
 import backtype.storm.topology.TopologyBuilder;
+import backtype.storm.StormSubmitter;
 import de.fuberlin.csw.storm.slidingwindow.SlidingWindowBolt;
 
 /**
@@ -17,7 +18,7 @@ import de.fuberlin.csw.storm.slidingwindow.SlidingWindowBolt;
  */
 public class RollingSumExampleTopology {
 	
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws Exception {
 		final int PARTICIPANTS = 4;
 		final int PARTICIPANTS_SIZE = 5;
 		// => sliding window size = 20
@@ -47,11 +48,16 @@ public class RollingSumExampleTopology {
 		}
 		
 		Config conf = new Config();
-        conf.setDebug(false);
-        LocalCluster cluster = new LocalCluster();
-        cluster.submitTopology("rolling_sum", conf, builder.createTopology());
-        Thread.sleep(10000);
-        cluster.shutdown();
+	        conf.setDebug(false);
+       		if(args.length > 0) {
+			conf.setNumWorkers(8);
+			StormSubmitter.submitTopology(args[0], conf, builder.createTopology());
+		} else {
+			LocalCluster cluster = new LocalCluster();
+		        cluster.submitTopology("rolling_sum", conf, builder.createTopology());
+	        	Thread.sleep(10000);
+		        cluster.shutdown();
+		}
 	}
 	
 }
